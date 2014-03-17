@@ -1,0 +1,68 @@
+<?php
+
+/**
+ * @file nutritioninfo.install
+ * TODO: Enter file description here.
+ */
+
+/**
+ * Implements hook_field_schema().
+ */
+function nutritioninfo_field_schema($field)
+{
+    $columns = array(
+        'calories'              => array(
+            'description' => 'The number of calories.',
+            'type'        => 'int'
+        ),
+        'carbohydrateContent'   => array(
+            'description' => 'The number of grams of carbohydrates.',
+            'type'        => 'int'
+        ),
+        'cholesterolContent'    => array(
+            'description' => 'The number of milligrams of cholesterol.',
+            'type'        => 'int'
+        ),
+        'fatContent'            => array(
+            'description' => 'The number of grams of fat.',
+            'type'        => 'int'
+        ),
+        'fiberContent'          => array(
+            'description' => 'The number of grams of fiber.',
+            'type'        => 'int'
+        ),
+        'proteinContent'        => array(
+            'description' => 'The number of grams of protein.',
+            'type'        => 'int'
+        ),
+        'saturatedFatContent'   => array(
+            'description' => 'The number of grams of saturated fat.',
+            'type'        => 'int'
+        ),
+        'servingSize'           => array(
+            'description' => 'The serving size, in terms of volume or mass.',
+            'type'        => 'text',
+            'length'      => '255'
+        ),
+        'sodiumContent'         => array(
+            'description' => 'The number of milligrams of sodium.',
+            'type'        => 'int'
+        ),
+        'sugarContent'          => array(
+            'description' => 'The number of grams of sugar.',
+            'type'        => 'int'
+        ),
+        'transFatContent'       => array(
+            'description' => 'The number of grams of trans fats.',
+            'type'        => 'int'
+        ),
+        'unsaturatedFatContent' => array(
+            'description' => 'The number of grams of unsaturated fat.',
+            'type'        => 'int'
+        )
+    );
+
+    return array(
+        'columns' => $columns
+    );
+}

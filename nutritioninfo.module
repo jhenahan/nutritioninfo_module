@@ -1,0 +1,184 @@
+<?php
+
+/**
+ * @file nutritioninfo.module
+ * TODO: Enter file description here.
+ */
+
+
+define( 'NUTRITION_INFO_FIELD_NAMES', serialize([ 'calories',
+                                                  'carbohydrateContent',
+                                                  'cholesterolContent',
+                                                  'fatContent',
+                                                  'fiberContent',
+                                                  'proteinContent',
+                                                  'saturatedFatContent',
+                                                  'servingSize',
+                                                  'sodiumContent',
+                                                  'sugarContent',
+                                                  'transFatContent',
+                                                  'unsaturatedFatContent' ]) );
+
+/**
+ * Implements hook_field_info().
+ */
+function nutritioninfo_field_info()
+{
+    $fields = array();
+
+    $fields[ 'nutritioninfo' ] = array(
+        'label'             => t('Nutrition Information'),
+        'description'       => t('This field stores nutrition information as defined at http://schema.org/NutritionInformation.'),
+        'settings'          => array(),
+        'instance_settings' => array(),
+        'default_widget'    => 'nutritioninfo_standard',
+        'default_formatter' => 'nutritioninfo_default',
+    );
+
+    return $fields;
+}
+
+/**
+ * Implements hook_field_validate().
+ */
+function nutritioninfo_field_validate($entity_type, $entity, $field, $instance,
+                                      $langcode, $items, &$errors)
+{
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function nutritioninfo_field_is_empty($item, $field)
+{
+    $fields = unserialize(NUTRITION_INFO_FIELD_NAMES);
+
+    $empties = array();
+
+    foreach ($fields as $field)
+    {
+        array_push($empties, empty( $item[ $field ] ));
+    }
+
+    $isEmpty = array_reduce($empties, function ($a, $b)
+    {
+        return $a && $b;
+    }, true);
+
+    return $isEmpty;
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function nutritioninfo_field_widget_info()
+{
+    $widgets = array();
+
+    $widgets[ 'nutritioninfo_standard' ] = array(
+        'label'       => t('Nutrition Information form'),
+        'field types' => array( 'nutritioninfo' ),
+    );
+
+    return $widgets;
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function nutritioninfo_field_widget_form(&$form, &$form_state, $field,
+                                         $instance, $langcode, $items, $delta,
+                                         $element)
+{
+
+    $settings =
+        $form_state[ 'field' ][ $instance[ 'field_name' ] ][ $langcode ][ 'field' ][ 'settings' ];
+
+    $fieldNames = unserialize(NUTRITION_INFO_FIELD_NAMES);
+
+    $fieldWords           = array_map('camelCaseToWords', $fieldNames);
+    $translatedFieldWords = array_map('t', $fieldWords);
+
+    $fields = array_combine($fieldNames, $translatedFieldWords);
+
+    foreach ($fields as $key => $label)
+    {
+        $value =
+            isset( $items[ $delta ][ $key ] ) ? $items[ $delta ][ $key ] : '';
+
+        $element[ $key ] = array(
+            '#attributes'    => array(
+                'class' => array( 'edit-nutrition-field' ),
+                'title' => t('')
+            ),
+            '#type'          => 'textfield',
+            '#size'          => 50,
+            '#maxlength'     => 255,
+            '#title'         => $label,
+            '#default_value' => $value,
+            '#prefix'        =>
+                '<div class="nutrition-field nutrition-' . $key . '-field">',
+            '#suffix'        => '</div>',
+        );
+    }
+
+    return $element;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function nutritioninfo_field_formatter_info()
+{
+    return array(
+        'nutritioninfo_default' => array(
+            'label'       => t('Default'),
+            'field types' => array( 'text', 'text_long', 'text_with_summary' ),
+        ),
+    );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function nutritioninfo_field_formatter_view($entity_type, $entity, $field,
+                                            $instance, $langcode, $items,
+                                            $display)
+{
+    $element  = array();
+    $settings = $display[ 'settings' ];
+
+    $fieldNames = unserialize(NUTRITION_INFO_FIELD_NAMES);
+
+    $fieldWords           = array_map('camelCaseToWords', $fieldNames);
+    $translatedFieldWords = array_map('t', $fieldWords);
+
+    switch ($display[ 'type' ])
+    {
+        case 'nutritioninfo_default':
+            $element[ 0 ][ '#markup' ] = theme('table',
+                                               array( 'header' => $translatedFieldWords,
+                                                      'rows'   => $items ));
+            break;
+    }
+
+    return $element;
+}
+
+
+/**
+ * I generally hate regex, but there aren't exactly a lot of options
+ * in this case.
+ *
+ * @param $identifier camelCaseIdentifier to be transformed to Title Case Words.
+ *
+ * @return string A Title Case String
+ */
+function camelCaseToWords($identifier)
+{
+    $words =
+        preg_replace('/(?!^)[A-Z]{2,}(?=[A-Z][a-z])|[A-Z][a-z]/', ' $0',
+                     $identifier);
+
+    return ucfirst($words);
+}
